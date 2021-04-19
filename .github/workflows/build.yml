@@ -10,22 +10,32 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./src/FriendlyWordsDotNet
+    defaults:        
     steps:
     - uses: actions/checkout@v2
+      with:
+        repository: glitchdotcom/friendly-words
+        path: friendly-words
+    - uses: actions/checkout@v2
+      with:
+        path: main
+    - name: Copy words files
+      run: |
+        cp -R -v friendly-words/words main/src/FriendlyWordsDotNet/words
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: main/src/FriendlyWordsDotNet
     - name: Build
       run: dotnet build --no-restore
+      working-directory: main/src/FriendlyWordsDotNet
     - name: Test
       run: dotnet test --no-build --verbosity normal
+      working-directory: main/src/FriendlyWordsDotNet
     - uses: actions/upload-artifact@v2
       with: 
         name: artifacts
-        path: ./src/FriendlyWordsDotNet/bin/Debug/netstandard2.0/
+        path: main/src/FriendlyWordsDotNet/bin/Debug/netstandard2.0/
