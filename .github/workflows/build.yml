@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest 
     steps:
     - name: Checkout FriendlyWordsDotNet
-    - uses: actions/checkout@v2
+      uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
@@ -33,7 +33,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
       working-directory: src/FriendlyWordsDotNet
     - name: Upload artifact
-    - uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v2
       with: 
         name: artifacts
         path: src/FriendlyWordsDotNet/bin/Debug/netstandard2.0/
