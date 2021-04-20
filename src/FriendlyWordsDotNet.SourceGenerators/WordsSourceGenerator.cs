@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -28,17 +27,8 @@ namespace FriendlyWordsDotNet
                                                                                                DiagnosticSeverity.Error,
                                                                                                isEnabledByDefault: true);
 
-        private static readonly DiagnosticDescriptor TestError = new(id: "FWDN-codegen-003",
-                                                                                               title: "Invalid word",
-                                                                                               messageFormat: "Word contains non-alphabet characters: {0}, Source File: {1}",
-                                                                                               category: nameof(WordsSourceGenerator),
-                                                                                               DiagnosticSeverity.Info,
-                                                                                               isEnabledByDefault: true);
-
         public void Execute(GeneratorExecutionContext context)
         {
-            context.ReportDiagnostic(Diagnostic.Create(TestError, Location.None, "fdgf", "fdfgdf"));
-
             var sb = new StringBuilder(@"
 using System;
 
@@ -62,13 +52,10 @@ namespace FriendlyWordsDotNet
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            Debug.WriteLine("Hello");
-            Console.WriteLine("Hello");
         }
 
         private string GeneratePropertyFromFile(AdditionalText file, Action<Diagnostic> diagnosticCallback)
         {
-
             var fileName = Path.GetFileNameWithoutExtension(file.Path);
 
             if (!AlphabetRegex.IsMatch(fileName))
@@ -77,17 +64,15 @@ namespace FriendlyWordsDotNet
                 return string.Empty;
             }
 
-            var fieldName = "_" + fileName.ToLowerInvariant();
+            var fieldName = "_" + fileName[0].ToString().ToLowerInvariant() + fileName.Substring(1);
             var propertyName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(fileName.ToLower());
-
-            var lines = file.GetText().Lines;
 
             var sb = new StringBuilder($@"
         private static readonly string[] {fieldName} = new[] 
         {{
 ");
 
-            foreach (var line in lines)
+            foreach (var line in file.GetText().Lines)
             {
                 if (!AlphabetRegex.IsMatch(line.ToString()))
                 {
