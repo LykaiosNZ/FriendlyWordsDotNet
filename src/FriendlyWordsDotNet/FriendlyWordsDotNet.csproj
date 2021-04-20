@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="./words/*.txt" />
+    <AdditionalFiles Include="../words/**/*">
+      <Link>words\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+    </AdditionalFiles>
   </ItemGroup>
 
   <ItemGroup>
