@@ -86,7 +86,7 @@ namespace FriendlyWordsDotNet
             sb.Append($@"
         }};
 
-        public static WordCollection {propertyName} {{get;}} = new WordCollection({fieldName});");
+        public static Words {propertyName} {{get;}} = new Words({fieldName});");
 
             return sb.ToString();
         } 
