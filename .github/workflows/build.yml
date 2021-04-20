@@ -22,8 +22,7 @@ jobs:
       with:
         node-version: '14'
     - name: Get words files
-      run: |
-        tools/get-words.sh
+      run: tools/get-words.sh
     - name: Restore dependencies
       run: dotnet restore
       working-directory: src/FriendlyWordsDotNet
