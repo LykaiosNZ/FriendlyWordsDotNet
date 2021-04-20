@@ -20,7 +20,7 @@ jobs:
         path: main
     - name: Copy words files
       run: |
-        cp -R -v friendly-words/words main/src/FriendlyWordsDotNet/words
+        cp -R -v friendly-words/words main/src/FriendlyWordsDotNet
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
