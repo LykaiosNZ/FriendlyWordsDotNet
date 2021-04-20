@@ -14,18 +14,18 @@ namespace FriendlyWordsDotNet
         private static readonly Regex AlphabetRegex = new("[A-Za-z]");
 
         private static readonly DiagnosticDescriptor InvalidFileNameError = new(id: "FWDN-codegen-001",
-                                                                                               title: "Invalid words file name",
-                                                                                               messageFormat: "Words file name contains non-alphabet characters: {0}",
-                                                                                               category: nameof(WordsSourceGenerator),
-                                                                                               DiagnosticSeverity.Error,
-                                                                                               isEnabledByDefault: true);
+                                                                                title: "Invalid words file name",
+                                                                                messageFormat: "Words file name contains non-alphabet characters: {0}",
+                                                                                category: nameof(WordsSourceGenerator),
+                                                                                defaultSeverity: DiagnosticSeverity.Error,
+                                                                                isEnabledByDefault: true);
 
         private static readonly DiagnosticDescriptor InvalidWordError = new(id: "FWDN-codegen-002",
-                                                                                               title: "Invalid word",
-                                                                                               messageFormat: "Word contains non-alphabet characters: {0}, Source File: {1}",
-                                                                                               category: nameof(WordsSourceGenerator),
-                                                                                               DiagnosticSeverity.Error,
-                                                                                               isEnabledByDefault: true);
+                                                                            title: "Invalid word",
+                                                                            messageFormat: "Word contains non-alphabet characters: {0}, Source File: {1}",
+                                                                            category: nameof(WordsSourceGenerator),
+                                                                            defaultSeverity: DiagnosticSeverity.Error,
+                                                                            isEnabledByDefault: true);
 
         public void Execute(GeneratorExecutionContext context)
         {
