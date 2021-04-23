@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FriendlyWordsDotNet", "Frie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FriendlyWordsDotNet.SourceGenerators", "FriendlyWordsDotNet.SourceGenerators\FriendlyWordsDotNet.SourceGenerators.csproj", "{36BF62A4-D25F-4988-9C18-BB753C8AE83D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FriendlyWordsDotNet.SourceGenerators.Tests", "FriendlyWordsDotNet.SourceGenerators.Tests\FriendlyWordsDotNet.SourceGenerators.Tests.csproj", "{233F4017-3961-42E4-A4A6-60437D547984}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{36BF62A4-D25F-4988-9C18-BB753C8AE83D}.Release|x64.Build.0 = Release|Any CPU
 		{36BF62A4-D25F-4988-9C18-BB753C8AE83D}.Release|x86.ActiveCfg = Release|Any CPU
 		{36BF62A4-D25F-4988-9C18-BB753C8AE83D}.Release|x86.Build.0 = Release|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Debug|x64.Build.0 = Debug|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Debug|x86.Build.0 = Debug|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Release|Any CPU.Build.0 = Release|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Release|x64.ActiveCfg = Release|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Release|x64.Build.0 = Release|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Release|x86.ActiveCfg = Release|Any CPU
+		{233F4017-3961-42E4-A4A6-60437D547984}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

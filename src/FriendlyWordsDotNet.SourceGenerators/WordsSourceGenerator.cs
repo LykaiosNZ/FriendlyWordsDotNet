@@ -11,7 +11,7 @@ namespace FriendlyWordsDotNet
     [Generator]
     public class WordsSourceGenerator : ISourceGenerator
     {
-        private static readonly Regex AlphabetRegex = new("[A-Za-z]");
+        private static readonly Regex AlphabetRegex = new("^[A-Za-z]+$");
 
         private static readonly DiagnosticDescriptor InvalidFileNameError = new(id: "FWDN-codegen-001",
                                                                                 title: "Invalid words file name",
@@ -31,6 +31,8 @@ namespace FriendlyWordsDotNet
         {
             var sb = new StringBuilder(@"
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace FriendlyWordsDotNet
 {
@@ -68,8 +70,10 @@ namespace FriendlyWordsDotNet
             var propertyName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(fileName.ToLower());
 
             var sb = new StringBuilder($@"
-        private static readonly string[] {fieldName} = new[] 
-        {{
+        public static IReadOnlyCollection<string> {propertyName} {{ get; }} = new ReadOnlyCollection<string> 
+        (
+            new[] 
+            {{
 ");
 
             foreach (var line in file.GetText().Lines)
@@ -80,15 +84,14 @@ namespace FriendlyWordsDotNet
                     continue;
                 }
 
-                sb.AppendLine($"           \"{line}\",");
+                sb.AppendLine($"               \"{line}\",");
             }
 
-            sb.Append($@"
-        }};
 
-        public static Words {propertyName} {{get;}} = new Words({fieldName});");
+            sb.Append(@"            }
+        );");
 
             return sb.ToString();
-        } 
+        }
     }
 }
