@@ -25,7 +25,7 @@ jobs:
     - name: Get words files
       run: tools/get-words.sh
     - name: Restore dependencies
-      run: dotnet restore -c ${{ env.CONFIGURATION }}
+      run: dotnet restore
       working-directory: src
     - name: Build
       run: dotnet build --no-restore -c ${{ env.CONFIGURATION }}
