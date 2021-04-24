@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -29,8 +30,12 @@ namespace FriendlyWordsDotNet
 
         public void Execute(GeneratorExecutionContext context)
         {
+            if (!context.AdditionalFiles.Any())
+            {
+                return;
+            }
+
             var sb = new StringBuilder(@"
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
