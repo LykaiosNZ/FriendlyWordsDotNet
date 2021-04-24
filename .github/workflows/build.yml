@@ -28,12 +28,17 @@ jobs:
       working-directory: src
     - name: Build
       run: dotnet build --no-restore
+    - name: Set Test Title
+      run: |
+        echo "title=Test Run ${{github.run_number}}" >> $GITHUB_ENV
+        echo "file_name=TestReport.${{github.run_number}}.md" >> $GITHUB_ENV
       working-directory: src
     - name: Test
-      run: dotnet test --no-build --verbosity d --logger "junit;LogFilePath=../../tests/report.xml"
+      run: dotnet test --no-build --verbosity normal --logger:"liquid.md;LogFileName=${{github.workspace}}/${{env.file_name}};Title=${{env.title}};"
       working-directory: src
-    - name: Publish Test Report
-      uses: mikepenz/action-junit-report@v2
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2
+      if: ${{always()}}
       with:
-        report_paths: 'tests/report.xml'
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        name: 'Test Run'
+        path: ${{github.workspace}}/${{env.file_name}}
