@@ -1,27 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reflection;
-using FluentAssertions;
-using FluentAssertions.Execution;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NUnit.Framework;
-
 namespace FriendlyWordsDotNet.SourceGenerators.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Collections.ObjectModel;
+    using System.Linq;
+    using System.Reflection;
+    using FluentAssertions;
+    using FluentAssertions.Execution;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using NUnit.Framework;
+
     public class Tests
     {
-        [Test]
-        public void WordsSourceGenerator_WhenFileIsValid_ShouldGenerateCorrectOutput()
+        [Test(Description = "Tests that, given a valid input, the expected source is generated.")]
+        public void WordsSourceGeneratorShouldGenerateCorrectOutput()
         {
             // Arrange
             Compilation inputCompilation = CreateCompilation();
 
-            WordsSourceGenerator generator = new WordsSourceGenerator();
+            var generator = new WordsSourceGenerator();
 
             var fileName = "test.txt";
             var expectedPropertyName = "Test";
@@ -61,7 +61,7 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
                 @class.IsStatic.Should().BeFalse("type {0} should not be static", expectedTypeName);
                 @class.IsSealed.Should().BeTrue("type {0} should be sealed", expectedTypeName);
 
-                ClassDeclarationSyntax classDeclaration = (ClassDeclarationSyntax)@class.DeclaringSyntaxReferences[0].GetSyntax();
+                var classDeclaration = (ClassDeclarationSyntax)@class.DeclaringSyntaxReferences[0].GetSyntax();
 
                 classDeclaration.Modifiers.Should().Contain(t => t.IsKind(SyntaxKind.PartialKeyword), "declaration of type {0} should have the partial modifier", expectedTypeName);
             }
@@ -87,13 +87,13 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
             // Property Initializer Assertions
             using (new AssertionScope())
             {
-                PropertyDeclarationSyntax propertyNode = (PropertyDeclarationSyntax)property.DeclaringSyntaxReferences[0].GetSyntax();
+                var propertyNode = (PropertyDeclarationSyntax)property.DeclaringSyntaxReferences[0].GetSyntax();
 
                 propertyNode.Initializer.Should().NotBeNull("property {0} should have an initializer", expectedPropertyName);
 
                 propertyNode.Initializer!.Value.IsKind(SyntaxKind.ObjectCreationExpression).Should().BeTrue("initializer for property {0} should be an object creation expression", expectedPropertyName);
 
-                ObjectCreationExpressionSyntax objectCreation = (ObjectCreationExpressionSyntax)propertyNode.Initializer.Value;
+                var objectCreation = (ObjectCreationExpressionSyntax)propertyNode.Initializer.Value;
 
                 ISymbol objectTypeSymbol = model.GetSymbolInfo(objectCreation.Type).Symbol!;
 
@@ -107,7 +107,7 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
 
                 ArgumentSyntax argument = args.First();
 
-                ImplicitArrayCreationExpressionSyntax arrayCreationExpression = (ImplicitArrayCreationExpressionSyntax)argument.Expression;
+                var arrayCreationExpression = (ImplicitArrayCreationExpressionSyntax)argument.Expression;
 
                 arrayCreationExpression.Initializer.Expressions.Should().AllBeOfType<LiteralExpressionSyntax>().And.OnlyContain(l => l.IsKind(SyntaxKind.StringLiteralExpression), "initialized array should only contain strings");
                 arrayCreationExpression.Initializer.Expressions.OfType<LiteralExpressionSyntax>().Select(e => e.Token.ValueText).Should().BeEquivalentTo(expectedWords, "initialized array should contain all the words from the AdditionalText");

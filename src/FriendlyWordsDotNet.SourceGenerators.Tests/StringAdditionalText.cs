@@ -1,11 +1,11 @@
-using System;
-using System.Text;
-using System.Threading;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-
 namespace FriendlyWordsDotNet.SourceGenerators
 {
+    using System;
+    using System.Text;
+    using System.Threading;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.Text;
+
     internal class StringAdditionalText : AdditionalText
     {
         private readonly Lazy<SourceText> _sourceText;
@@ -25,10 +25,7 @@ namespace FriendlyWordsDotNet.SourceGenerators
         {
             private readonly string _value;
 
-            public StringSourceText(string value)
-            {
-                _value = value;
-            }
+            public StringSourceText(string value) => _value = value;
 
             public override char this[int position] => _value[position];
 

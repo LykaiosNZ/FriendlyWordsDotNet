@@ -1,13 +1,14 @@
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-
 namespace FriendlyWordsDotNet
 {
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CSharp;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
     [System.Diagnostics.CodeAnalysis.SuppressMessage("MicrosoftCodeAnalysisReleaseTracking", "RS2008:Enable analyzer release tracking")]
     [Generator]
     public class WordsSourceGenerator : ISourceGenerator
@@ -35,38 +36,38 @@ namespace FriendlyWordsDotNet
                 return;
             }
 
-            var @namespace = NamespaceDeclaration(ParseName("FriendlyWordsDotNet"));
+            NamespaceDeclarationSyntax @namespace = NamespaceDeclaration(ParseName("FriendlyWordsDotNet"));
 
             @namespace = @namespace.AddUsings(
                 UsingDirective(ParseName("System.Collections.Generic")),
                 UsingDirective(ParseName("System.Collections.ObjectModel"))
              );
 
-            var @class = ClassDeclaration(Identifier("FriendlyWords"))
+            ClassDeclarationSyntax @class = ClassDeclaration(Identifier("FriendlyWords"))
                             .AddModifiers(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.SealedKeyword), Token(SyntaxKind.PartialKeyword));
 
-            foreach (var additionalFile in context.AdditionalFiles)
+            foreach (AdditionalText additionalFile in context.AdditionalFiles)
             {
                 var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(additionalFile.Path);
 
                 var propertyName = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(fileNameWithoutExtension);
 
-                var arrayInitializerExpressions = additionalFile.GetText()
-                                                                .Lines
-                                                                .Select(l => LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(l.ToString())))
-                                                                .ToArray();
+                LiteralExpressionSyntax[] arrayInitializerExpressions = additionalFile.GetText()
+                                                                            .Lines
+                                                                            .Select(l => LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(l.ToString())))
+                                                                            .ToArray();
 
-                var arrayCreationExpression = ImplicitArrayCreationExpression(
+                ImplicitArrayCreationExpressionSyntax implicitArrayCreation = ImplicitArrayCreationExpression(
                                                 InitializerExpression(SyntaxKind.ArrayInitializerExpression)
                                                     .AddExpressions(arrayInitializerExpressions)
                                               );
 
-                var objectCreationExpression = ObjectCreationExpression(ParseTypeName("ReadOnlyCollection<string>"))
-                                                .AddArgumentListArguments(Argument(arrayCreationExpression));
+                ObjectCreationExpressionSyntax objectCreation = ObjectCreationExpression(ParseTypeName("ReadOnlyCollection<string>"))
+                                                .AddArgumentListArguments(Argument(implicitArrayCreation));
 
-                var initializer = EqualsValueClause(objectCreationExpression);
+                EqualsValueClauseSyntax initializer = EqualsValueClause(objectCreation);
 
-                var property = PropertyDeclaration(ParseTypeName("IReadOnlyCollection<string>"), propertyName)
+                PropertyDeclarationSyntax property = PropertyDeclaration(ParseTypeName("IReadOnlyCollection<string>"), propertyName)
                                 .AddModifiers(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword))
                                 .AddAccessorListAccessors(
                                     AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
@@ -81,7 +82,7 @@ namespace FriendlyWordsDotNet
 
             @namespace = @namespace.AddMembers(@class);
 
-            string code = @namespace.NormalizeWhitespace()
+            var code = @namespace.NormalizeWhitespace()
                                     .ToFullString();
 
             context.AddSource("FriendlyWordsGenerated", code);
