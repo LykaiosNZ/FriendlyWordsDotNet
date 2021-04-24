@@ -1,10 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using System;
+using Microsoft.CodeAnalysis.CSharp;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace FriendlyWordsDotNet
 {
@@ -35,68 +35,60 @@ namespace FriendlyWordsDotNet
                 return;
             }
 
-            var sb = new StringBuilder(@"
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+            var @namespace = NamespaceDeclaration(ParseName("FriendlyWordsDotNet"));
 
-namespace FriendlyWordsDotNet
-{
-    public sealed partial class FriendlyWords
-    {
-            ");
+            @namespace = @namespace.AddUsings(
+                UsingDirective(ParseName("System.Collections.Generic")),
+                UsingDirective(ParseName("System.Collections.ObjectModel"))
+             );
 
-            foreach (var file in context.AdditionalFiles)
+            var @class = ClassDeclaration(Identifier("FriendlyWords"))
+                            .AddModifiers(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.SealedKeyword), Token(SyntaxKind.PartialKeyword));
+
+            foreach (var additionalFile in context.AdditionalFiles)
             {
-                sb.AppendLine(GeneratePropertyFromFile(file, context.ReportDiagnostic));
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(additionalFile.Path);
+
+                var propertyName = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(fileNameWithoutExtension);
+
+                var arrayInitializerExpressions = additionalFile.GetText()
+                                                                .Lines
+                                                                .Select(l => LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(l.ToString())))
+                                                                .ToArray();
+
+                var arrayCreationExpression = ImplicitArrayCreationExpression(
+                                                InitializerExpression(SyntaxKind.ArrayInitializerExpression)
+                                                    .AddExpressions(arrayInitializerExpressions)
+                                              );
+
+                var objectCreationExpression = ObjectCreationExpression(ParseTypeName("ReadOnlyCollection<string>"))
+                                                .AddArgumentListArguments(Argument(arrayCreationExpression));
+
+                var initializer = EqualsValueClause(objectCreationExpression);
+
+                var property = PropertyDeclaration(ParseTypeName("IReadOnlyCollection<string>"), propertyName)
+                                .AddModifiers(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword))
+                                .AddAccessorListAccessors(
+                                    AccessorDeclaration(SyntaxKind.GetAccessorDeclaration).WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
+                                 )
+                                .WithInitializer(initializer)
+                                .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+
+                @class = @class.AddMembers(property);
             }
 
-            sb.Append(@"
-    }
-}");
+            @class = @class.NormalizeWhitespace();
 
-            context.AddSource("FriendlyWordsGenerated.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
+            @namespace = @namespace.AddMembers(@class);
+
+            string code = @namespace.NormalizeWhitespace()
+                                    .ToFullString();
+
+            context.AddSource("FriendlyWordsGenerated", code);
         }
 
         public void Initialize(GeneratorInitializationContext context)
         {
-        }
-
-        private string GeneratePropertyFromFile(AdditionalText file, Action<Diagnostic> diagnosticCallback)
-        {
-            var fileName = Path.GetFileNameWithoutExtension(file.Path);
-
-            if (!AlphabetRegex.IsMatch(fileName))
-            {
-                diagnosticCallback(Diagnostic.Create(InvalidFileNameError, Location.None, fileName));
-                return string.Empty;
-            }
-
-            var fieldName = "_" + fileName[0].ToString().ToLowerInvariant() + fileName.Substring(1);
-            var propertyName = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(fileName.ToLower());
-
-            var sb = new StringBuilder($@"
-        public static IReadOnlyCollection<string> {propertyName} {{ get; }} = new ReadOnlyCollection<string> 
-        (
-            new[] 
-            {{
-");
-
-            foreach (var line in file.GetText().Lines)
-            {
-                if (!AlphabetRegex.IsMatch(line.ToString()))
-                {
-                    diagnosticCallback(Diagnostic.Create(InvalidWordError, Location.None, line, Path.GetFileName(file.Path)));
-                    continue;
-                }
-
-                sb.AppendLine($"               \"{line}\",");
-            }
-
-
-            sb.Append(@"            }
-        );");
-
-            return sb.ToString();
         }
     }
 }

@@ -40,6 +40,8 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
             GeneratorDriverRunResult runResult = driver.GetRunResult();
             SemanticModel model = outputCompilation.GetSemanticModel(runResult.GeneratedTrees[0]);
 
+            TestContext.Write(runResult.GeneratedTrees[0]);
+
             using (new AssertionScope("Generator Output"))
             {
                 runResult.Diagnostics.Should().BeEmpty("generator should not generate any diagnostic errors from a valid file");
