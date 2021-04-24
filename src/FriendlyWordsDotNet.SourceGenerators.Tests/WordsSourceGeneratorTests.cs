@@ -16,13 +16,9 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
     public class Tests
     {
         [Test(Description = "Tests that, given a valid input, the expected source is generated.")]
-        public void WordsSourceGeneratorShouldGenerateCorrectOutput()
+        public void ShouldGenerateCorrectOutput()
         {
             // Arrange
-            Compilation inputCompilation = CreateCompilation();
-
-            var generator = new WordsSourceGenerator();
-
             var fileName = "test.txt";
             var expectedPropertyName = "Test";
             var expectedWords = new[] { "foo", "bar" };
@@ -30,14 +26,8 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
 
             var additionalText = new StringAdditionalText(fileName, string.Join(Environment.NewLine, expectedWords));
 
-            GeneratorDriver driver = CSharpGeneratorDriver.Create(new[] { generator }, additionalTexts: new[] { additionalText });
+            ExecuteGenerator(new[] { additionalText }, out Compilation outputCompilation, out GeneratorDriverRunResult runResult);
 
-            // Act
-            // (Note: the generator driver itself is immutable, and all calls return an updated version of the driver that you should use for subsequent calls)
-            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out Compilation outputCompilation, out ImmutableArray<Diagnostic> diagnostics);
-
-            // Assert
-            GeneratorDriverRunResult runResult = driver.GetRunResult();
             SemanticModel model = outputCompilation.GetSemanticModel(runResult.GeneratedTrees[0]);
 
             TestContext.Write(runResult.GeneratedTrees[0]);
@@ -112,6 +102,52 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
                 arrayCreationExpression.Initializer.Expressions.Should().AllBeOfType<LiteralExpressionSyntax>().And.OnlyContain(l => l.IsKind(SyntaxKind.StringLiteralExpression), "initialized array should only contain strings");
                 arrayCreationExpression.Initializer.Expressions.OfType<LiteralExpressionSyntax>().Select(e => e.Token.ValueText).Should().BeEquivalentTo(expectedWords, "initialized array should contain all the words from the AdditionalText");
             }
+        }
+
+        [Test]
+        public void ShouldReturnDiagnosticWhenFileNameContainsNonAlphabetCharacters()
+        {
+            // Arrange
+            var fileName = "te#%$#@%9st.txt";
+            var words = new[] { "foo", "bar" };
+
+            var additionalText = new StringAdditionalText(fileName, string.Join(Environment.NewLine, words));
+
+            // Act
+            ExecuteGenerator(new[] { additionalText }, out Compilation compilation, out GeneratorDriverRunResult runResult);
+
+            // Assert
+            runResult.Diagnostics.Should().Contain(d => d.Id == WordsSourceGenerator.InvalidFileNameErrorId && d.Severity == DiagnosticSeverity.Error);
+        }
+
+        [Test]
+        public void ShouldReturnDiagnosticWhenWordContainsNonAlphabetCharacters()
+        {
+            // Arrange
+            var fileName = "test.txt";
+            var words = new[] { "foo", "b@r" };
+
+            var additionalText = new StringAdditionalText(fileName, string.Join(Environment.NewLine, words));
+
+            // Act
+            ExecuteGenerator(new[] { additionalText }, out Compilation compilation, out GeneratorDriverRunResult runResult);
+
+            // Assert
+            runResult.Diagnostics.Should().Contain(d => d.Id == WordsSourceGenerator.InvalidWordErrorId && d.Severity == DiagnosticSeverity.Error);
+        }
+
+        private static void ExecuteGenerator(IEnumerable<AdditionalText> additionalTexts, out Compilation outputCompilation, out GeneratorDriverRunResult runResult)
+        {
+            Compilation inputCompilation = CreateCompilation();
+
+            GeneratorDriver driver = CSharpGeneratorDriver.Create(new[] { new WordsSourceGenerator() }, additionalTexts);
+
+            // Act
+            // (Note: the generator driver itself is immutable, and all calls return an updated version of the driver that you should use for subsequent calls)
+            driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out outputCompilation, out ImmutableArray<Diagnostic> _);
+
+            // Assert
+            runResult = driver.GetRunResult();
         }
 
         private static Compilation CreateCompilation()
