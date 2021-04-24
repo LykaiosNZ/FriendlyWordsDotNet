@@ -41,7 +41,7 @@ using System.Collections.ObjectModel;
 
 namespace FriendlyWordsDotNet
 {
-    public partial class FriendlyWords
+    public sealed partial class FriendlyWords
     {
             ");
 

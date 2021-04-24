@@ -56,7 +56,8 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
             {
                 @class!.TypeKind.Should().Be(TypeKind.Class, "type {0} should be a class", expectedTypeName);
                 @class.DeclaredAccessibility.Should().Be(Accessibility.Public, "type {0} should be publicly accessible", expectedTypeName);
-                @class.IsStatic.Should().BeFalse("type {0} should not be static");
+                @class.IsStatic.Should().BeFalse("type {0} should not be static", expectedTypeName);
+                @class.IsSealed.Should().BeTrue("type {0} should be sealed", expectedTypeName);
 
                 ClassDeclarationSyntax classDeclaration = (ClassDeclarationSyntax)@class.DeclaringSyntaxReferences[0].GetSyntax();
 
@@ -66,7 +67,7 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
             // Property Assertions
             IPropertySymbol? property = @class.GetProperty(expectedPropertyName);
 
-            property.Should().NotBeNull("property {0} should be generated");
+            property.Should().NotBeNull("property {0} should be generated", expectedPropertyName);
 
             using (new AssertionScope())
             {
@@ -94,7 +95,7 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
 
                 ISymbol objectTypeSymbol = model.GetSymbolInfo(objectCreation.Type).Symbol!;
 
-                var expectedInitializerObjectType = outputCompilation.GetSymbolForType<ReadOnlyCollection<string>>();
+                ITypeSymbol expectedInitializerObjectType = outputCompilation.GetSymbolForType<ReadOnlyCollection<string>>();
 
                 objectTypeSymbol.Should().Be(expectedInitializerObjectType, "initializer for property {0} should create an instance of {1}", expectedPropertyName, expectedInitializerObjectType);
 
@@ -102,12 +103,12 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
 
                 args.Should().HaveCount(1);
 
-                var argument = args.First();
+                ArgumentSyntax argument = args.First();
 
-                var arrayCreationExpression = (ImplicitArrayCreationExpressionSyntax)argument.Expression;
+                ImplicitArrayCreationExpressionSyntax arrayCreationExpression = (ImplicitArrayCreationExpressionSyntax)argument.Expression;
 
-                arrayCreationExpression.Initializer.Expressions.Should().AllBeOfType<LiteralExpressionSyntax>();
-                arrayCreationExpression.Initializer.Expressions.OfType<LiteralExpressionSyntax>().Select(e => e.Token.ValueText).Should().BeEquivalentTo(expectedWords);
+                arrayCreationExpression.Initializer.Expressions.Should().AllBeOfType<LiteralExpressionSyntax>().And.OnlyContain(l => l.IsKind(SyntaxKind.StringLiteralExpression), "initialized array should only contain strings");
+                arrayCreationExpression.Initializer.Expressions.OfType<LiteralExpressionSyntax>().Select(e => e.Token.ValueText).Should().BeEquivalentTo(expectedWords, "initialized array should contain all the words from the AdditionalText");
             }
         }
 
