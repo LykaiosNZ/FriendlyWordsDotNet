@@ -105,7 +105,7 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
         }
 
         [Test]
-        public void ShouldReturnDiagnosticWhenFileNameContainsNonAlphabetCharacters()
+        public void ShouldHaveErrorWhenFileNameContainsNonAlphabetCharacters()
         {
             // Arrange
             var fileName = "te#%$#@%9st.txt";
@@ -121,7 +121,7 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
         }
 
         [Test]
-        public void ShouldReturnDiagnosticWhenWordContainsNonAlphabetCharacters()
+        public void ShouldHaveErrorWhenWordContainsNonAlphabetCharacters()
         {
             // Arrange
             var fileName = "test.txt";
