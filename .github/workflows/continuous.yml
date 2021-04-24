@@ -1,4 +1,4 @@
-name: Build
+name: Continuous
 
 on:
   push:
@@ -8,8 +8,9 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest 
+    env:
+      CONFIGURATION = Release
     steps:
     - name: Checkout FriendlyWordsDotNet
       uses: actions/checkout@v2
@@ -24,17 +25,18 @@ jobs:
     - name: Get words files
       run: tools/get-words.sh
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore -c ${{ env.CONFIGURATION }}
       working-directory: src
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore -c ${{ env.CONFIGURATION }}
       working-directory: src
-    - name: 
+    - name: Test
       uses: zyborg/dotnet-tests-report@v1
       with:
         project_path: src
-        report_name: friendlywordsdotnet_tests_${{ github.run_number}}
-        report_title: FriendlyWordsDotNet Tests - ${{ github.run_number}}
+        report_name: friendlywordsdotnet_tests_${{ github.run_number }}
+        report_title: FriendlyWordsDotNet Tests - ${{ github.run_number }}
         github_token: ${{ secrets.GITHUB_TOKEN }}
         no_restore: true
         set_check_status_from_test_outcome: true
+        msbuild_configuration: ${{ env.CONFIGURATION }}
