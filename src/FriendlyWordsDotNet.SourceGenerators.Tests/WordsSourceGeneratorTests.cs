@@ -30,6 +30,7 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
 
             SemanticModel model = outputCompilation.GetSemanticModel(runResult.GeneratedTrees[0]);
 
+            TestContext.WriteLine("Generated code:");
             TestContext.Write(runResult.GeneratedTrees[0]);
 
             using (new AssertionScope("Generator Output"))
