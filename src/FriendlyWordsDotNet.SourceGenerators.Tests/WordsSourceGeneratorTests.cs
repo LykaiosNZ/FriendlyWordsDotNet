@@ -118,7 +118,7 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
             ExecuteGenerator(new[] { additionalText }, out Compilation compilation, out GeneratorDriverRunResult runResult);
 
             // Assert
-            runResult.Diagnostics.Should().Contain(d => d.Id == WordsSourceGenerator.InvalidFileNameErrorId && d.Severity == DiagnosticSeverity.Error);
+            runResult.Diagnostics.Should().Contain(d => d.Descriptor == DiagnosticsDescriptors.InvalidFileName && d.Severity == DiagnosticSeverity.Error);
         }
 
         [Test]
@@ -134,20 +134,36 @@ namespace FriendlyWordsDotNet.SourceGenerators.Tests
             ExecuteGenerator(new[] { additionalText }, out Compilation compilation, out GeneratorDriverRunResult runResult);
 
             // Assert
-            runResult.Diagnostics.Should().Contain(d => d.Id == WordsSourceGenerator.InvalidWordErrorId && d.Severity == DiagnosticSeverity.Error);
+            runResult.Diagnostics.Should().Contain(d => d.Descriptor == DiagnosticsDescriptors.InvalidWord && d.Severity == DiagnosticSeverity.Error);
+        }
+
+        [Test]
+        [TestCase("")]
+        [TestCase("      ")]
+        [TestCase("\n")]
+        public void ShouldHaveWarningWhenFileIsEmptyOrWhitespace(string fileContent)
+        {
+            // Arrange
+            var fileName = "test.txt";
+
+            var additionalText = new StringAdditionalText(fileName, fileContent);
+
+            // Act
+            ExecuteGenerator(new[] { additionalText }, out Compilation compilation, out GeneratorDriverRunResult runResult);
+
+            // Assert
+            runResult.Diagnostics.Should().Contain(d => d.Descriptor == DiagnosticsDescriptors.EmptyFile && d.Severity == DiagnosticSeverity.Warning);
         }
 
         private static void ExecuteGenerator(IEnumerable<AdditionalText> additionalTexts, out Compilation outputCompilation, out GeneratorDriverRunResult runResult)
         {
             Compilation inputCompilation = CreateCompilation();
 
-            GeneratorDriver driver = CSharpGeneratorDriver.Create(new[] { new WordsSourceGenerator() }, additionalTexts);
+            GeneratorDriver driver = CSharpGeneratorDriver.Create(new[] { new FriendlyWordsSourceGenerator() }, additionalTexts);
 
-            // Act
             // (Note: the generator driver itself is immutable, and all calls return an updated version of the driver that you should use for subsequent calls)
             driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out outputCompilation, out ImmutableArray<Diagnostic> _);
 
-            // Assert
             runResult = driver.GetRunResult();
         }
 
