@@ -107,7 +107,6 @@ namespace FriendlyWordsDotNet.SourceGenerators
 
             if (!arrayInitializerExpressions.Any())
             {
-                context.ReportDiagnostic(Diagnostic.Create(DiagnosticsDescriptors.EmptyFile, Location.Create(file.Path, new TextSpan(0, 0), new LinePositionSpan(LinePosition.Zero, LinePosition.Zero))));
                 return null;
             }
 
@@ -126,12 +125,13 @@ namespace FriendlyWordsDotNet.SourceGenerators
         {
             SourceText? text = file.GetText();
 
-            if (text == null || text.Length == 0)
+            if (string.IsNullOrWhiteSpace(text?.ToString()))
             {
+                context.ReportDiagnostic(Diagnostic.Create(DiagnosticsDescriptors.EmptyFile, Location.Create(file.Path, new TextSpan(0, 0), new LinePositionSpan(LinePosition.Zero, LinePosition.Zero))));
                 yield break;
             }
 
-            foreach (TextLine line in text.Lines)
+            foreach (TextLine line in text!.Lines)
             {
                 var word = line.ToString();
 
