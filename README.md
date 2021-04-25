@@ -1,5 +1,5 @@
 # FriendlyWordsDotNet
-[![Continuous](https://github.com/LykaiosNZ/FriendlyWordsDotNet/actions/workflows/continuous.yml/badge.svg)](https://github.com/LykaiosNZ/FriendlyWordsDotNet/actions/workflows/continuous.yml)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/LykaiosNZ/FriendlyWordsDotNet/Continuous) ![Nuget](https://img.shields.io/nuget/v/FriendlyWordsDotNet)
 
 A .NET port of the [friendly-words](https://github.com/glitchdotcom/friendly-words) npm package.
 
