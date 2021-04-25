@@ -40,6 +40,8 @@ jobs:
     - name: Pack
       run: dotnet pack --no-restore -o ../artifacts -c ${{ env.CONFIGURATION }}
       working-directory: src
+    - name: Publish
+      run: dotnet nuget push "artifacts/*.nupkg" -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
